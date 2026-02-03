@@ -18,28 +18,6 @@ async function getWeatherByCity (city: string){
     return { temp: null, error: 'Weather data not available for this city' };
 }
 
-// Define package tracking tool
-server.registerTool(
-    'trackPackage',
-    {
-        title: 'Package Tracker',
-        description: 'Track delivery status using tracking number',
-        inputSchema: z.object({
-            trackingNumber: z.string().describe('Package tracking number'),
-        }),
-        async ({trackingNumber}) => {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Checking delivery status for: ${trackingNumber}`
-                    }
-                ]
-            };
-        }
-    }
-);
-
 // Define weather fetching tool
 server.registerTool(
     'getWeatherByCityName',
@@ -60,5 +38,21 @@ server.registerTool(
                 ]
             };
         }
+    }
+);
+
+// Registering a static resource on the MCP server
+server.registerResource(
+    // URI: A unique identifier for this resource
+    'weather://cities',
+    // Description: Explains what this resource provides
+    'List of supported cities',
+    // MIME Type: Describe the format of the data being returned
+    'text/plain',
+    // Data Function: An async function that returns the actual content of the resource
+    async()=> {
+        return `Supported Cities:
+        - London (UK)
+        - New York (USA)`;
     }
 );
