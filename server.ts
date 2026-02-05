@@ -24,35 +24,44 @@ server.registerTool(
     {
         title: 'Weather by City',
         description: 'Get weather data for New York or London',
-        inputSchema: z.object({
+        inputSchema: {
             city: z.string().describe('Name of the city to get weather for')
-        }),
-        async ({city})=> {
-            const weatherData = await getWeatherByCity(city);
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: JSON.stringify(weatherData)
-                    }
-                ]
-            };
+        },
+        outputSchema: {
+            temp: z.string(),
+            forecast: z.string().optional(),
+            error: z.string().optional()
         }
+    },
+    async ({ city }) => {
+        const weatherData = await getWeatherByCity(city);
+        return {
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify(weatherData)
+                }
+            ],
+            structuredContent: weatherData
+        };
     }
 );
 
 // Registering a static resource on the MCP server
 server.registerResource(
-    // URI: A unique identifier for this resource
+    'cities',
     'weather://cities',
-    // Description: Explains what this resource provides
-    'List of supported cities',
-    // MIME Type: Describe the format of the data being returned
-    'text/plain',
-    // Data Function: An async function that returns the actual content of the resource
-    async()=> {
-        return `Supported Cities:
-        - London (UK)
-        - New York (USA)`;
-    }
+    {
+        title: 'List of supported cities',
+        description: 'Get a list of supported cities for weather queries',
+        mimeType: 'text/plain'
+    },
+    async (uri) => ({
+        contents: [
+            {
+                uri: uri.href,
+                text: `Supported Cities:\n- London (UK)\n- New York (USA)`
+            }
+        ]
+    })
 );
